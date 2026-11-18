@@ -1,5 +1,3 @@
-"""Practice paper patterns based on the supplied exam samples."""
-
 from collections import Counter
 from dataclasses import dataclass
 from string import ascii_lowercase

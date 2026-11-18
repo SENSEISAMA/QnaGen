@@ -1,5 +1,3 @@
-"""Build separate student paper and answer-key PDFs with ReportLab."""
-
 from dataclasses import dataclass
 from html import escape
 from io import BytesIO
@@ -243,22 +241,19 @@ def _build(
         for group in pattern.groups:
             for index, slot in enumerate(group.slots):
                 heading = group.title if index == 0 else ""
-                rule = group.instruction if heading and not answer_key else ""
-                rows.append((heading, rule, slot.number, f" [{slot.marks:g} marks]", next(remaining)))
+                rows.append((heading, slot.number, f" [{slot.marks:g} marks]", next(remaining)))
     else:
         number = 0
         for section_number, (kind, items) in enumerate(groupby(questions, key=lambda q: q["type"]), 1):
             for index, item in enumerate(items):
                 number += 1
                 heading = f"Section {chr(64 + section_number)}: {SECTION_TITLES[kind]}" if index == 0 else ""
-                rows.append((heading, "", str(number), "", item))
+                rows.append((heading, str(number), "", item))
 
-    for heading, rule, number, marks, item in rows:
+    for heading, number, marks, item in rows:
         block = []
         if heading:
             block.append(_paragraph(heading, styles["QSection"]))
-        if rule:
-            block.append(_paragraph(rule, styles["QBody"]))
         block.append(_paragraph(f"{number}. {item['question']}{marks}", styles["QBody"]))
         if answer_key:
             block.append(_paragraph(f"{item['type']}  |  {item['difficulty']}", styles["QMeta"]))

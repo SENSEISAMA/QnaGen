@@ -1,7 +1,4 @@
-"""Basic text cleanup, paragraph segmentation, and character-bound chunking."""
-
 import re
-
 
 def clean_text(text: str) -> str:
     text = text.replace("\x00", " ").replace("\u00ad", "")

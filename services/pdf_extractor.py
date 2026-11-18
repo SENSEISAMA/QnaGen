@@ -1,15 +1,9 @@
-"""Validate and extract text from uploaded PDFs with PyMuPDF."""
-
 import pymupdf
-
-
 class PDFInputError(ValueError):
     """The uploaded PDF cannot be used for text generation."""
 
-
 class PDFPageLimitError(PDFInputError):
     """The PDF does not fit within the available page budget."""
-
 
 def extract_pdf_text(data: bytes, max_file_mb: int, max_pages: int) -> tuple[str, int]:
     if not data:

@@ -1,5 +1,3 @@
-"""Check JSON shape and simple question constraints; no factual verification."""
-
 import re
 from collections import Counter
 

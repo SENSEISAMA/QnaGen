@@ -34,4 +34,4 @@ Install Git, Python 3.11+, and Ollama. Then run these commands in PowerShell:
 
 ## Usage
 
-Upload PDFs with selectable text, choose a paper pattern, generate and review the questions, then download the paper and answer key. No API key is required.
+Upload PDFs with selectable text, choose a paper pattern, generate and review the questions, then download the paper and answer key. No API key is needed.

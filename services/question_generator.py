@@ -1,5 +1,3 @@
-"""Question drafting with programmatic validation and regeneration."""
-
 import json
 from urllib.error import HTTPError, URLError
 from urllib.request import ProxyHandler, Request, build_opener

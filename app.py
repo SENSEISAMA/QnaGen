@@ -1,6 +1,5 @@
 """Streamlit entry point for the QnaGen PDF-to-question-paper workflow."""
 
-from importlib import reload
 from time import monotonic
 from uuid import uuid4
 
@@ -26,16 +25,6 @@ from services.validator import (
     validate_batch,
 )
 
-
-# Refresh modules from a running session if they predate the latest PDF changes.
-if getattr(config, "UPLOAD_LIMITS_VERSION", None) != 2:
-    config = reload(config)
-if not hasattr(pdf_extractor, "PDFPageLimitError"):
-    pdf_extractor = reload(pdf_extractor)
-
-EXPECTED_PDF_LAYOUT_VERSION = 4
-if getattr(pdf_builder, "PDF_LAYOUT_VERSION", None) != EXPECTED_PDF_LAYOUT_VERSION:
-    pdf_builder = reload(pdf_builder)
 
 st.set_page_config(page_title="QnaGen", page_icon="📄", layout="wide")
 st.title("QnaGen", anchor=False, text_alignment="center")
@@ -222,9 +211,7 @@ if submitted:
                     difficulty,
                     slots=slots,
                 )
-                if pattern:
-                    pattern.check_questions(questions)
-                else:
+                if not pattern:
                     questions.sort(key=lambda item: QUESTION_TYPES.index(item["type"]))
             st.session_state["qnagen_draft"] = {
                 "questions": questions,
@@ -269,11 +256,12 @@ with st.container():
             st.success(notice)
 
         output = st.session_state.get("qnagen_output")
-        if output and output.get("layout_version") != EXPECTED_PDF_LAYOUT_VERSION:
+        if output and output.get("layout_version") != pdf_builder.PDF_LAYOUT_VERSION:
             clear_export()
             output = None
         if output:
-            st.success(f"Created PDFs with {len(output['questions'])} reviewed questions.")
+            question_count = output.get("question_count", len(output.get("questions", ())))
+            st.success(f"Created PDFs with {question_count} reviewed questions.")
             paper_filename = "question_paper.pdf"
             if draft_pattern:
                 term = "midterm" if draft_pattern.table_layout else "endterm"
@@ -418,8 +406,6 @@ with st.container():
                             {kind: count for kind, count in counts.items() if count},
                             "Mixed", set(),
                         )
-                        if draft_pattern:
-                            draft_pattern.check_questions(reviewed)
                         if show_outcomes:
                             for question, saved_question in zip(reviewed, draft["questions"]):
                                 question["course_outcomes"] = saved_question.get("course_outcomes", "")
@@ -432,7 +418,7 @@ with st.container():
                         st.session_state["qnagen_output"] = {
                             "paper": paper_pdf,
                             "key": key_pdf,
-                            "questions": reviewed,
+                            "question_count": len(reviewed),
                             "layout_version": pdf_builder.PDF_LAYOUT_VERSION,
                         }
                         st.session_state["qnagen_notice"] = "Reviewed PDFs are ready to download."
